@@ -12,6 +12,15 @@ contract Adoption {
     return petId;
   }
 
+  // Abandoning a pet
+  function abandon(uint petId) public returns (uint) {
+    require(petId >= 0 && petId <= 15);
+
+    adopters[petId] = 0x0000000000000000000000000000000000000000;
+
+    return petId;
+  }
+
   // Retrieving the adopters
   function getAdopters() public returns (address[16]) {
     return adopters;

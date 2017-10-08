@@ -15,6 +15,7 @@ App = {
         petTemplate.find('.pet-age').text(data[i].age);
         petTemplate.find('.pet-location').text(data[i].location);
         petTemplate.find('.btn-adopt').attr('data-id', data[i].id);
+        petTemplate.find('.btn-abandon').attr('data-id', data[i].id);
 
         petsRow.append(petTemplate.html());
       }
@@ -55,6 +56,7 @@ App = {
 
   bindEvents: function() {
     $(document).on('click', '.btn-adopt', App.handleAdopt);
+    $(document).on('click', '.btn-abandon', App.handleAbandon);
   },
 
   markAdopted: function(adopters, account) {
@@ -69,6 +71,9 @@ App = {
         if (adopters[i] !== '0x0000000000000000000000000000000000000000') {
           $('.panel-pet').eq(i).find('.btn-adopt').text('Success').attr('disabled', true);
           $('.panel-pet').eq(i).find('.btn-abandon').show();
+        } else {
+          $('.panel-pet').eq(i).find('.btn-adopt').text('Adopt').attr('disabled', false);
+          $('.panel-pet').eq(i).find('.btn-abandon').hide();
         }
       }
     }).catch(function(err) {
@@ -94,6 +99,32 @@ App = {
         adoptionInstance = instance;
 
         return adoptionInstance.adopt(petId, {from: account});
+      }).then(function(result) {
+        return App.markAdopted();
+      }).catch(function(err) {
+        console.log(err.message);
+      });
+    });
+  },
+
+  handleAbandon: function() {
+    event.preventDefault();
+
+    var petId = parseInt($(event.target).data('id'));
+
+    web3.eth.getAccounts(function(error, accounts) {
+      if (error) {
+        console.log(error);
+      }
+
+      var account = accounts[0];
+
+      var adoptionInstance;
+
+      App.contracts.Adoption.deployed().then(function(instance) {
+        adoptionInstance = instance;
+
+        return adoptionInstance.abandon(petId);
       }).then(function(result) {
         return App.markAdopted();
       }).catch(function(err) {
